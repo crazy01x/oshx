@@ -1,0 +1,1 @@
+{"name":"oshx-mcp","version":"1.0.0","description":"Operational MCP server with bundled CLI","type":"module","license":"MIT","bin":{"oshx":"./cli.ts"},"scripts":{"start":"bun run index.ts","cli":"bun run cli.ts","mcp:start":"bun run cli.ts start","mcp:init":"bun run cli.ts init","mcp:doctor":"bun run cli.ts doctor"}}
