@@ -1,0 +1,11 @@
+# Runtime state
+oshx/
+.oshx/
+filesystem-mirror/
+
+# Runtime config/secrets
+agent-policy.json
+runtime-config.json
+
+# Logs
+*.log
