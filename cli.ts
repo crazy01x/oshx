@@ -2,6 +2,7 @@
 
 import fs from "fs";
 import path from "path";
+import readline from "readline";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +17,38 @@ interface RuntimeConfig {
   obsidian: boolean;
   created_at: string;
   updated_at: string;
+}
+
+const ANSI = {
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  fgWhite: "\x1b[97m",
+  fgGray: "\x1b[37m",
+  fgDark: "\x1b[90m",
+  bgBlack: "\x1b[40m",
+};
+
+function paint(text: string, ...styles: string[]): string {
+  return `${ANSI.bgBlack}${styles.join("")}${text}${ANSI.reset}`;
+}
+
+function line(width = 72): string {
+  return "─".repeat(width);
+}
+
+function box(title: string, rows: string[]): string {
+  const width = 72;
+  const top = `┌${line(width)}┐`;
+  const sep = `├${line(width)}┤`;
+  const bottom = `└${line(width)}┘`;
+  const safeTitle = title.length > width ? `${title.slice(0, width - 1)}…` : title;
+  const titleFill = " ".repeat(Math.max(0, width - safeTitle.length));
+  const normalized = rows.map((row) => {
+    const clean = row.length > width ? `${row.slice(0, width - 1)}…` : row;
+    const fill = " ".repeat(Math.max(0, width - clean.length));
+    return `│${clean}${fill}│`;
+  });
+  return [top, `│${safeTitle}${titleFill}│`, sep, ...normalized, bottom].join("\n");
 }
 
 function nowIso(): string {
@@ -75,31 +108,102 @@ function hasFlag(flag: string, args: string[]): boolean {
 }
 
 function printHelp(): void {
-  console.log(`
-OSHX CLI
+  console.log(paint("\nOSHX CLI\n", ANSI.bold, ANSI.fgWhite));
+  console.log(box("Comandos", [
+    "start                Inicia o servidor MCP (stdio)",
+    "init                 Inicializa runtime e diretórios",
+    "doctor               Valida paths e configuração",
+    "config show          Exibe runtime-config atual",
+    "config set           Atualiza runtime-config",
+    "ui                   Abre interface interativa",
+  ]));
+  console.log(box("Opções (init/config set)", [
+    "--project <path>     Caminho do projeto",
+    "--storage <path>     Caminho de armazenamento OSHX",
+    "--framework <name>   nextjs | react | personalizado",
+    "--obsidian           Habilita docs/obsidian",
+    "--no-obsidian        Desabilita docs/obsidian",
+  ]));
+  console.log(box("Exemplos", [
+    "bun run cli.ts ui",
+    "bun run cli.ts init --project . --storage ./.oshx --framework react",
+    "bun run cli.ts doctor",
+  ]));
+}
 
-Usage:
-  oshx <command> [options]
+function printHero(): void {
+  console.clear();
+  const header = [
+    "OSHX COMMAND CONSOLE",
+    "Interface monocromática (preto e branco)",
+    "Inspirada em CLIs de coding agents",
+  ];
+  console.log(box("", header));
+  console.log(
+    box("Atalhos", [
+      "1) Doctor",
+      "2) Config Show",
+      "3) Init (padrão atual)",
+      "4) Start MCP",
+      "5) Help",
+      "0) Exit",
+    ]),
+  );
+}
 
-Commands:
-  start                 Start MCP server (stdio)
-  init                  Initialize runtime config and directories
-  doctor                Validate runtime configuration and paths
-  config show           Show runtime config
-  config set            Update runtime config
+function question(rl: readline.Interface, prompt: string): Promise<string> {
+  return new Promise((resolve) => rl.question(prompt, resolve));
+}
 
-Options (init/config set):
-  --project <path>      Project path
-  --storage <path>      Storage path for OSHX data
-  --framework <name>    nextjs | react | personalizado
-  --obsidian            Enable obsidian docs folder
-  --no-obsidian         Disable obsidian docs folder
+async function runInteractiveUi(): Promise<void> {
+  printHero();
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: true,
+  });
 
-Examples:
-  bun run cli.ts init --project . --storage ./.oshx --framework react
-  bun run cli.ts start
-  bun run cli.ts doctor
-`);
+  const prompt = paint("oshx> ", ANSI.bold, ANSI.fgWhite);
+
+  try {
+    while (true) {
+      const raw = (await question(rl, prompt)).trim();
+      const cmd = raw.toLowerCase();
+
+      if (!cmd) continue;
+      if (cmd === "0" || cmd === "exit" || cmd === "quit" || cmd === "q") break;
+
+      if (cmd === "1" || cmd === "doctor") {
+        runDoctor();
+        continue;
+      }
+
+      if (cmd === "2" || cmd === "config show") {
+        showConfig();
+        continue;
+      }
+
+      if (cmd === "3" || cmd === "init") {
+        runInit([]);
+        continue;
+      }
+
+      if (cmd === "4" || cmd === "start") {
+        console.log(paint("Iniciando MCP...", ANSI.fgWhite));
+        await startMcp();
+        break;
+      }
+
+      if (cmd === "5" || cmd === "help" || cmd === "h") {
+        printHelp();
+        continue;
+      }
+
+      console.log(paint(`Comando não reconhecido: ${raw}`, ANSI.fgDark));
+    }
+  } finally {
+    rl.close();
+  }
 }
 
 function normalizeFramework(value?: string): RuntimeConfig["framework"] {
@@ -185,8 +289,18 @@ async function main(): Promise<void> {
   const command = args[0];
   const sub = args[1];
 
-  if (!command || command === "--help" || command === "-h" || command === "help") {
+  if (!command) {
+    await runInteractiveUi();
+    return;
+  }
+
+  if (command === "--help" || command === "-h" || command === "help") {
     printHelp();
+    return;
+  }
+
+  if (command === "ui") {
+    await runInteractiveUi();
     return;
   }
 
