@@ -8,13 +8,13 @@ interface KineticTextProps {
   color?: string;
 }
 
-export const KineticText: React.FC<KineticTextProps> = ({ text, fontSize = 72, color = THEME.white }) => {
+export const KineticText: React.FC<KineticTextProps> = ({ text, fontSize = 96, color = THEME.white }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const progress = spring({ frame, fps, config: { damping: 8, stiffness: 300, mass: 0.6 }, durationInFrames: 20 });
-  const scale = interpolate(progress, [0, 1], [3, 1]);
-  const translateY = interpolate(progress, [0, 1], [-40, 0]);
+  const progress = spring({ frame, fps, config: { damping: 7, stiffness: 320, mass: 0.5 }, durationInFrames: 22 });
+  const scale = interpolate(progress, [0, 1], [4, 1]);
+  const translateY = interpolate(progress, [0, 1], [-60, 0]);
 
   return (
     <div

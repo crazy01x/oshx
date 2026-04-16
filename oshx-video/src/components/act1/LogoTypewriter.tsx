@@ -3,12 +3,12 @@ import { useCurrentFrame } from 'remotion';
 import { THEME, FONT } from '../../theme';
 import { LOGO_LINES } from '../../data';
 
-export const FLASH_START = 130;
+export const FLASH_START = 140;
 
 export const LogoTypewriter: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const CHARS_PER_FRAME = 2.5;
+  const CHARS_PER_FRAME = 3;
   const fullText = LOGO_LINES.join('\n');
   const visibleChars = Math.floor(Math.min(frame * CHARS_PER_FRAME, fullText.length));
 
@@ -28,13 +28,13 @@ export const LogoTypewriter: React.FC = () => {
     <div
       style={{
         fontFamily: FONT,
-        fontSize: 20,
+        fontSize: 34,
         lineHeight: 1.5,
         whiteSpace: 'pre',
         color: isFlash ? THEME.bg : THEME.white,
         backgroundColor: isFlash ? THEME.purple : 'transparent',
-        letterSpacing: 1,
-        padding: isFlash ? '8px 16px' : 0,
+        letterSpacing: 2,
+        padding: isFlash ? '12px 24px' : 0,
         transition: 'none',
       }}
     >
