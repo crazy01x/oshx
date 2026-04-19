@@ -1,5 +1,5 @@
 /** Extracts the parsed JSON from a tool result content array. */
-export function parseResult(raw: { content: Array<{ type: string; text: string }> }): {
+export function parseResult(raw: { content: Array<{ type: string; text: string }>; isError?: boolean }): {
     success: boolean;
     data?: unknown;
     error?: string;
