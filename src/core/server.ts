@@ -18,6 +18,7 @@ import { terminalModule } from "../tools/terminal-tools.js";
 import { vaultModule } from "../tools/vault-tools.js";
 import { xpModule } from "../tools/xp-tools.js";
 import { workspaceModule } from "../tools/workspace-tools.js";
+import { fsModule } from "../tools/fs-tools.js";
 import type { ToolModule } from "./constants.js";
 import { registerAll } from "./registry.js";
 
@@ -37,6 +38,7 @@ const modules: ToolModule[] = [
     systemModule,
     swarmModule,
     workspaceModule,
+    fsModule,
 ];
 
 const allDefinitions = modules.flatMap(m => m.definitions);
@@ -46,6 +48,7 @@ const allHandlers    = Object.fromEntries(modules.flatMap(m => Object.entries(m.
 export async function startMCPServer(): Promise<void> {
     // Registry powers tool-to-tool orchestration (oshx_chain + terminal mcp://)
     registerAll(allHandlers);
+    registerAll(fsModule.handlers, "filesystem");
     startAutonomyLoop();
 
     const server = new Server(
