@@ -12,7 +12,8 @@
     "cli": "bun run cli.ts",
     "mcp:start": "bun run cli.ts start",
     "mcp:init": "bun run cli.ts init",
-    "mcp:doctor": "bun run cli.ts doctor"
+    "mcp:doctor": "bun run cli.ts doctor",
+    "test": "bun test"
   },
   "dependencies": {
     "ink": "5",
