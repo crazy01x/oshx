@@ -20,6 +20,7 @@ import { xpModule } from "../tools/xp-tools.js";
 import { workspaceModule } from "../tools/workspace-tools.js";
 import { fsModule } from "../tools/fs-tools.js";
 import { shellModule } from "../tools/shell-tools.js";
+import { memoryModule } from "../tools/memory-tools.js";
 import type { ToolModule } from "./constants.js";
 import { registerAll } from "./registry.js";
 
@@ -41,6 +42,7 @@ const modules: ToolModule[] = [
     workspaceModule,
     fsModule,
     shellModule,
+    memoryModule,
 ];
 
 const allDefinitions = modules.flatMap(m => m.definitions);
@@ -52,6 +54,7 @@ export async function startMCPServer(): Promise<void> {
     registerAll(allHandlers);
     registerAll(fsModule.handlers, "filesystem");
     registerAll(shellModule.handlers, "terminal");
+    registerAll(memoryModule.handlers, "state");
     startAutonomyLoop();
 
     const server = new Server(
