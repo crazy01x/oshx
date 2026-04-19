@@ -69,6 +69,22 @@ export function err(text: string) {
     return { content: [{ type: "text", text: ` ${text}` }] };
 }
 
+export function jsonOk(data: unknown) {
+    return { content: [{ type: "text", text: JSON.stringify({ success: true, data }) }] };
+}
+
+export function jsonErr(error: string) {
+    return { content: [{ type: "text", text: JSON.stringify({ success: false, error }) }] };
+}
+
+export function parseJsonResult(text: string): { success: boolean; data?: unknown; error?: string } {
+    try {
+        return JSON.parse(text) as { success: boolean; data?: unknown; error?: string };
+    } catch {
+        return { success: true, data: text };
+    }
+}
+
 // ── Global state ──────────────────────────────────────────────────────────────
 export function getState(): OshxState {
     return readJSON<OshxState>(STATE_FILE);
