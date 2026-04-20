@@ -18,6 +18,12 @@ import { terminalModule } from "../tools/terminal-tools.js";
 import { vaultModule } from "../tools/vault-tools.js";
 import { xpModule } from "../tools/xp-tools.js";
 import { workspaceModule } from "../tools/workspace-tools.js";
+import { fsModule } from "../tools/fs-tools.js";
+import { shellModule } from "../tools/shell-tools.js";
+import { memoryModule } from "../tools/memory-tools.js";
+import { orchestratorModule } from "../tools/orchestrator-tools.js";
+import { browserSessionModule } from "../tools/browser-session-tools.js";
+import { agentModule } from "../tools/agent-tools.js";
 import type { ToolModule } from "./constants.js";
 import { registerAll } from "./registry.js";
 
@@ -37,6 +43,12 @@ const modules: ToolModule[] = [
     systemModule,
     swarmModule,
     workspaceModule,
+    fsModule,
+    shellModule,
+    memoryModule,
+    orchestratorModule,
+    browserSessionModule,
+    agentModule,
 ];
 
 const allDefinitions = modules.flatMap(m => m.definitions);
@@ -46,6 +58,12 @@ const allHandlers    = Object.fromEntries(modules.flatMap(m => Object.entries(m.
 export async function startMCPServer(): Promise<void> {
     // Registry powers tool-to-tool orchestration (oshx_chain + terminal mcp://)
     registerAll(allHandlers);
+    registerAll(fsModule.handlers, "filesystem");
+    registerAll(shellModule.handlers, "terminal");
+    registerAll(memoryModule.handlers, "state");
+    registerAll(orchestratorModule.handlers, "agent");
+    registerAll(browserSessionModule.handlers, "web");
+    registerAll(agentModule.handlers, "agent");
     startAutonomyLoop();
 
     const server = new Server(
