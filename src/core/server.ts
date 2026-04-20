@@ -23,6 +23,7 @@ import { shellModule } from "../tools/shell-tools.js";
 import { memoryModule } from "../tools/memory-tools.js";
 import { orchestratorModule } from "../tools/orchestrator-tools.js";
 import { browserSessionModule } from "../tools/browser-session-tools.js";
+import { agentModule } from "../tools/agent-tools.js";
 import type { ToolModule } from "./constants.js";
 import { registerAll } from "./registry.js";
 
@@ -47,6 +48,7 @@ const modules: ToolModule[] = [
     memoryModule,
     orchestratorModule,
     browserSessionModule,
+    agentModule,
 ];
 
 const allDefinitions = modules.flatMap(m => m.definitions);
@@ -61,6 +63,7 @@ export async function startMCPServer(): Promise<void> {
     registerAll(memoryModule.handlers, "state");
     registerAll(orchestratorModule.handlers, "agent");
     registerAll(browserSessionModule.handlers, "web");
+    registerAll(agentModule.handlers, "agent");
     startAutonomyLoop();
 
     const server = new Server(
